@@ -66,7 +66,12 @@ void accept_request(void *arg)
                        * program */
     char *query_string = NULL;
 
+    // request header 中，GET /index.html HTTP/1.0 三者中间都是用空格进行分隔的
+    //                    method URL      version
+
+    // socket -> buffer
     numchars = get_line(client, buf, sizeof(buf));
+    // buffer -> method
     i = 0; j = 0;
     while (!ISspace(buf[i]) && (i < sizeof(method) - 1))
     {
@@ -76,6 +81,7 @@ void accept_request(void *arg)
     j=i;
     method[i] = '\0';
 
+    // strcasecmp 忽略大小写进行字符串匹配，相等返回0
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
         unimplemented(client);
@@ -85,6 +91,7 @@ void accept_request(void *arg)
     if (strcasecmp(method, "POST") == 0)
         cgi = 1;
 
+    // buffer -> url
     i = 0;
     while (ISspace(buf[j]) && (j < numchars))
         j++;
@@ -95,6 +102,8 @@ void accept_request(void *arg)
     }
     url[i] = '\0';
 
+    // 将指针query_string 指向?的位置，设置?为尾零，并指向下一个位置，也就是携带的参数开始的位置
+    // 如果没有参数，那么就指向url的尾零
     if (strcasecmp(method, "GET") == 0)
     {
         query_string = url;
@@ -108,18 +117,29 @@ void accept_request(void *arg)
         }
     }
 
+    // 经过上一步的参数修改，如果url中携带参数，那么就已经分隔成了url + 尾零 + 参数
+    // 如果url中没有携带参数，那么url还是url，没有发生变化
     sprintf(path, "htdocs%s", url);
+    // 如果url没有指定打开文件，那么默认打开index.html
     if (path[strlen(path) - 1] == '/')
         strcat(path, "index.html");
+
+    // 判断path对应的文件不存在
     if (stat(path, &st) == -1) {
+        // 如果path对应的文件不存在，那么就将request header中其余的信息全部读取出来，也就是直到读取到单独一行为\n
         while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
             numchars = get_line(client, buf, sizeof(buf));
+        // 然后响应404
         not_found(client);
     }
     else
     {
+        // path对应的文件存在
+        // 如果对应的文件是文件夹，则追加index.html，也就是打开对应文件夹下的index.html文件
         if ((st.st_mode & S_IFMT) == S_IFDIR)
             strcat(path, "/index.html");
+        // 如果文件是可执行文件，那么执行CGI
+        // 否则视作静态文件
         if ((st.st_mode & S_IXUSR) ||
                 (st.st_mode & S_IXGRP) ||
                 (st.st_mode & S_IXOTH)    )
@@ -221,6 +241,12 @@ void execute_cgi(int client, const char *path,
     int content_length = -1;
 
     buf[0] = 'A'; buf[1] = '\0';
+    // why need to discard request headers?
+    // ans: 将本次request中的剩余信息读取完毕，避免干扰下一次的读取(之前仅仅读取了第一行，也就是 METHOD URL VERSION)
+    // 将request中的剩余信息读取完毕，直到读取到\n，说明request剩余信息读取完毕
+
+    // 如果是GET请求，读取剩余信息即可
+    // 如果是POST请求，
     if (strcasecmp(method, "GET") == 0)
         while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
             numchars = get_line(client, buf, sizeof(buf));
@@ -229,6 +255,7 @@ void execute_cgi(int client, const char *path,
         numchars = get_line(client, buf, sizeof(buf));
         while ((numchars > 0) && strcmp("\n", buf))
         {
+            // 获取POST请求正文部分的长度 -> content_length
             buf[15] = '\0';
             if (strcasecmp(buf, "Content-Length:") == 0)
                 content_length = atoi(&(buf[16]));
@@ -257,8 +284,10 @@ void execute_cgi(int client, const char *path,
         cannot_execute(client);
         return;
     }
+    // response header
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
+    // fork出来的子进程执行CGI
     if (pid == 0)  /* child: CGI script */
     {
         char meth_env[255];
@@ -271,6 +300,7 @@ void execute_cgi(int client, const char *path,
         close(cgi_input[1]);
         sprintf(meth_env, "REQUEST_METHOD=%s", method);
         putenv(meth_env);
+        // GET POST 都可以执行CGI，GET的参数放到query_string中，POST的参数在content中
         if (strcasecmp(method, "GET") == 0) {
             sprintf(query_env, "QUERY_STRING=%s", query_string);
             putenv(query_env);
@@ -289,6 +319,7 @@ void execute_cgi(int client, const char *path,
                 recv(client, &c, 1, 0);
                 write(cgi_input[1], &c, 1);
             }
+        // recv response from child process and forward response to client
         while (read(cgi_output[0], &c, 1) > 0)
             send(client, &c, 1, 0);
 
@@ -404,10 +435,12 @@ void serve_file(int client, const char *filename)
     char buf[1024];
 
     buf[0] = 'A'; buf[1] = '\0';
+    // 将request中的剩余信息读取完毕，直到读取到\n，说明request剩余信息读取完毕
     while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
         numchars = get_line(client, buf, sizeof(buf));
 
     resource = fopen(filename, "r");
+    // 文件可能存在 可能不存在
     if (resource == NULL)
         not_found(client);
     else
