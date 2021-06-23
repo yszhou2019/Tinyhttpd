@@ -66,7 +66,7 @@ void accept_request(void *arg)
                        * program */
     char *query_string = NULL;
 
-    // request header ÖĞ£¬GET /index.html HTTP/1.0 ÈıÕßÖĞ¼ä¶¼ÊÇÓÃ¿Õ¸ñ½øĞĞ·Ö¸ôµÄ
+    // request header ä¸­ï¼ŒGET /index.html HTTP/1.0 ä¸‰è€…ä¸­é—´éƒ½æ˜¯ç”¨ç©ºæ ¼è¿›è¡Œåˆ†éš”çš„
     //                    method URL      version
 
     // socket -> buffer
@@ -81,7 +81,7 @@ void accept_request(void *arg)
     j=i;
     method[i] = '\0';
 
-    // strcasecmp ºöÂÔ´óĞ¡Ğ´½øĞĞ×Ö·û´®Æ¥Åä£¬ÏàµÈ·µ»Ø0
+    // strcasecmp å¿½ç•¥å¤§å°å†™è¿›è¡Œå­—ç¬¦ä¸²åŒ¹é…ï¼Œç›¸ç­‰è¿”å›0
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
         unimplemented(client);
@@ -102,8 +102,8 @@ void accept_request(void *arg)
     }
     url[i] = '\0';
 
-    // ½«Ö¸Õëquery_string Ö¸Ïò?µÄÎ»ÖÃ£¬ÉèÖÃ?ÎªÎ²Áã£¬²¢Ö¸ÏòÏÂÒ»¸öÎ»ÖÃ£¬Ò²¾ÍÊÇĞ¯´øµÄ²ÎÊı¿ªÊ¼µÄÎ»ÖÃ
-    // Èç¹ûÃ»ÓĞ²ÎÊı£¬ÄÇÃ´¾ÍÖ¸ÏòurlµÄÎ²Áã
+    // å°†æŒ‡é’ˆquery_string æŒ‡å‘?çš„ä½ç½®ï¼Œè®¾ç½®?ä¸ºå°¾é›¶ï¼Œå¹¶æŒ‡å‘ä¸‹ä¸€ä¸ªä½ç½®ï¼Œä¹Ÿå°±æ˜¯æºå¸¦çš„å‚æ•°å¼€å§‹çš„ä½ç½®
+    // å¦‚æœæ²¡æœ‰å‚æ•°ï¼Œé‚£ä¹ˆå°±æŒ‡å‘urlçš„å°¾é›¶
     if (strcasecmp(method, "GET") == 0)
     {
         query_string = url;
@@ -117,29 +117,29 @@ void accept_request(void *arg)
         }
     }
 
-    // ¾­¹ıÉÏÒ»²½µÄ²ÎÊıĞŞ¸Ä£¬Èç¹ûurlÖĞĞ¯´ø²ÎÊı£¬ÄÇÃ´¾ÍÒÑ¾­·Ö¸ô³ÉÁËurl + Î²Áã + ²ÎÊı
-    // Èç¹ûurlÖĞÃ»ÓĞĞ¯´ø²ÎÊı£¬ÄÇÃ´url»¹ÊÇurl£¬Ã»ÓĞ·¢Éú±ä»¯
+    // ç»è¿‡ä¸Šä¸€æ­¥çš„å‚æ•°ä¿®æ”¹ï¼Œå¦‚æœurlä¸­æºå¸¦å‚æ•°ï¼Œé‚£ä¹ˆå°±å·²ç»åˆ†éš”æˆäº†url + å°¾é›¶ + å‚æ•°
+    // å¦‚æœurlä¸­æ²¡æœ‰æºå¸¦å‚æ•°ï¼Œé‚£ä¹ˆurlè¿˜æ˜¯urlï¼Œæ²¡æœ‰å‘ç”Ÿå˜åŒ–
     sprintf(path, "htdocs%s", url);
-    // Èç¹ûurlÃ»ÓĞÖ¸¶¨´ò¿ªÎÄ¼ş£¬ÄÇÃ´Ä¬ÈÏ´ò¿ªindex.html
+    // å¦‚æœurlæ²¡æœ‰æŒ‡å®šæ‰“å¼€æ–‡ä»¶ï¼Œé‚£ä¹ˆé»˜è®¤æ‰“å¼€index.html
     if (path[strlen(path) - 1] == '/')
         strcat(path, "index.html");
 
-    // ÅĞ¶Ïpath¶ÔÓ¦µÄÎÄ¼ş²»´æÔÚ
+    // åˆ¤æ–­pathå¯¹åº”çš„æ–‡ä»¶ä¸å­˜åœ¨
     if (stat(path, &st) == -1) {
-        // Èç¹ûpath¶ÔÓ¦µÄÎÄ¼ş²»´æÔÚ£¬ÄÇÃ´¾Í½«request headerÖĞÆäÓàµÄĞÅÏ¢È«²¿¶ÁÈ¡³öÀ´£¬Ò²¾ÍÊÇÖ±µ½¶ÁÈ¡µ½µ¥¶ÀÒ»ĞĞÎª\n
+        // å¦‚æœpathå¯¹åº”çš„æ–‡ä»¶ä¸å­˜åœ¨ï¼Œé‚£ä¹ˆå°±å°†request headerä¸­å…¶ä½™çš„ä¿¡æ¯å…¨éƒ¨è¯»å–å‡ºæ¥ï¼Œä¹Ÿå°±æ˜¯ç›´åˆ°è¯»å–åˆ°å•ç‹¬ä¸€è¡Œä¸º\n
         while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
             numchars = get_line(client, buf, sizeof(buf));
-        // È»ºóÏìÓ¦404
+        // ç„¶åå“åº”404
         not_found(client);
     }
     else
     {
-        // path¶ÔÓ¦µÄÎÄ¼ş´æÔÚ
-        // Èç¹û¶ÔÓ¦µÄÎÄ¼şÊÇÎÄ¼ş¼Ğ£¬Ôò×·¼Óindex.html£¬Ò²¾ÍÊÇ´ò¿ª¶ÔÓ¦ÎÄ¼ş¼ĞÏÂµÄindex.htmlÎÄ¼ş
+        // pathå¯¹åº”çš„æ–‡ä»¶å­˜åœ¨
+        // å¦‚æœå¯¹åº”çš„æ–‡ä»¶æ˜¯æ–‡ä»¶å¤¹ï¼Œåˆ™è¿½åŠ index.htmlï¼Œä¹Ÿå°±æ˜¯æ‰“å¼€å¯¹åº”æ–‡ä»¶å¤¹ä¸‹çš„index.htmlæ–‡ä»¶
         if ((st.st_mode & S_IFMT) == S_IFDIR)
             strcat(path, "/index.html");
-        // Èç¹ûÎÄ¼şÊÇ¿ÉÖ´ĞĞÎÄ¼ş£¬ÄÇÃ´Ö´ĞĞCGI
-        // ·ñÔòÊÓ×÷¾²Ì¬ÎÄ¼ş
+        // å¦‚æœæ–‡ä»¶æ˜¯å¯æ‰§è¡Œæ–‡ä»¶ï¼Œé‚£ä¹ˆæ‰§è¡ŒCGI
+        // å¦åˆ™è§†ä½œé™æ€æ–‡ä»¶
         if ((st.st_mode & S_IXUSR) ||
                 (st.st_mode & S_IXGRP) ||
                 (st.st_mode & S_IXOTH)    )
@@ -242,11 +242,11 @@ void execute_cgi(int client, const char *path,
 
     buf[0] = 'A'; buf[1] = '\0';
     // why need to discard request headers?
-    // ans: ½«±¾´ÎrequestÖĞµÄÊ£ÓàĞÅÏ¢¶ÁÈ¡Íê±Ï£¬±ÜÃâ¸ÉÈÅÏÂÒ»´ÎµÄ¶ÁÈ¡(Ö®Ç°½ö½ö¶ÁÈ¡ÁËµÚÒ»ĞĞ£¬Ò²¾ÍÊÇ METHOD URL VERSION)
-    // ½«requestÖĞµÄÊ£ÓàĞÅÏ¢¶ÁÈ¡Íê±Ï£¬Ö±µ½¶ÁÈ¡µ½\n£¬ËµÃ÷requestÊ£ÓàĞÅÏ¢¶ÁÈ¡Íê±Ï
+    // ans: å°†æœ¬æ¬¡requestä¸­çš„å‰©ä½™ä¿¡æ¯è¯»å–å®Œæ¯•ï¼Œé¿å…å¹²æ‰°ä¸‹ä¸€æ¬¡çš„è¯»å–(ä¹‹å‰ä»…ä»…è¯»å–äº†ç¬¬ä¸€è¡Œï¼Œä¹Ÿå°±æ˜¯ METHOD URL VERSION)
+    // å°†requestä¸­çš„å‰©ä½™ä¿¡æ¯è¯»å–å®Œæ¯•ï¼Œç›´åˆ°è¯»å–åˆ°\nï¼Œè¯´æ˜requestå‰©ä½™ä¿¡æ¯è¯»å–å®Œæ¯•
 
-    // Èç¹ûÊÇGETÇëÇó£¬¶ÁÈ¡Ê£ÓàĞÅÏ¢¼´¿É
-    // Èç¹ûÊÇPOSTÇëÇó£¬
+    // å¦‚æœæ˜¯GETè¯·æ±‚ï¼Œè¯»å–å‰©ä½™ä¿¡æ¯å³å¯
+    // å¦‚æœæ˜¯POSTè¯·æ±‚ï¼Œ
     if (strcasecmp(method, "GET") == 0)
         while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
             numchars = get_line(client, buf, sizeof(buf));
@@ -255,7 +255,7 @@ void execute_cgi(int client, const char *path,
         numchars = get_line(client, buf, sizeof(buf));
         while ((numchars > 0) && strcmp("\n", buf))
         {
-            // »ñÈ¡POSTÇëÇóÕıÎÄ²¿·ÖµÄ³¤¶È -> content_length
+            // è·å–POSTè¯·æ±‚æ­£æ–‡éƒ¨åˆ†çš„é•¿åº¦ -> content_length
             buf[15] = '\0';
             if (strcasecmp(buf, "Content-Length:") == 0)
                 content_length = atoi(&(buf[16]));
@@ -269,6 +269,7 @@ void execute_cgi(int client, const char *path,
     else/*HEAD or other*/
     {
     }
+    // æ‰§è¡Œåˆ°è¿™é‡Œ request headerå·²ç»è¯»å–å®Œæ¯•ï¼Œå¦‚æœæ˜¯POSTè¯·æ±‚ï¼Œé‚£ä¹ˆæ¥ä¸‹æ¥çš„recvä¼šè¯»å–æºå¸¦çš„å‚æ•°
 
 
     if (pipe(cgi_output) < 0) {
@@ -287,7 +288,7 @@ void execute_cgi(int client, const char *path,
     // response header
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
-    // fork³öÀ´µÄ×Ó½ø³ÌÖ´ĞĞCGI
+    // forkå‡ºæ¥çš„å­è¿›ç¨‹æ‰§è¡ŒCGI
     if (pid == 0)  /* child: CGI script */
     {
         char meth_env[255];
@@ -300,7 +301,7 @@ void execute_cgi(int client, const char *path,
         close(cgi_input[1]);
         sprintf(meth_env, "REQUEST_METHOD=%s", method);
         putenv(meth_env);
-        // GET POST ¶¼¿ÉÒÔÖ´ĞĞCGI£¬GETµÄ²ÎÊı·Åµ½query_stringÖĞ£¬POSTµÄ²ÎÊıÔÚcontentÖĞ
+        // GET POST éƒ½å¯ä»¥æ‰§è¡ŒCGIï¼ŒGETçš„å‚æ•°æ”¾åˆ°query_stringä¸­ï¼ŒPOSTçš„å‚æ•°åœ¨contentä¸­
         if (strcasecmp(method, "GET") == 0) {
             sprintf(query_env, "QUERY_STRING=%s", query_string);
             putenv(query_env);
@@ -314,11 +315,18 @@ void execute_cgi(int client, const char *path,
     } else {    /* parent */
         close(cgi_output[1]);
         close(cgi_input[0]);
+        // è¯»å– request body ä¸­æºå¸¦çš„å‚æ•°ï¼Œå‚æ•°é•¿åº¦=content_length
+        char buffer[1024];
         if (strcasecmp(method, "POST") == 0)
             for (i = 0; i < content_length; i++) {
                 recv(client, &c, 1, 0);
                 write(cgi_input[1], &c, 1);
             }
+        // {
+        //     recv(client, buffer, 1000, 0);
+        //     write(cgi_input[1], buffer, content_length);
+        // }
+        // recv(client, buffer, 1000, 0);
         // recv response from child process and forward response to client
         while (read(cgi_output[0], &c, 1) > 0)
             send(client, &c, 1, 0);
@@ -435,12 +443,12 @@ void serve_file(int client, const char *filename)
     char buf[1024];
 
     buf[0] = 'A'; buf[1] = '\0';
-    // ½«requestÖĞµÄÊ£ÓàĞÅÏ¢¶ÁÈ¡Íê±Ï£¬Ö±µ½¶ÁÈ¡µ½\n£¬ËµÃ÷requestÊ£ÓàĞÅÏ¢¶ÁÈ¡Íê±Ï
+    // å°†requestä¸­çš„å‰©ä½™ä¿¡æ¯è¯»å–å®Œæ¯•ï¼Œç›´åˆ°è¯»å–åˆ°\nï¼Œè¯´æ˜requestå‰©ä½™ä¿¡æ¯è¯»å–å®Œæ¯•
     while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
         numchars = get_line(client, buf, sizeof(buf));
 
     resource = fopen(filename, "r");
-    // ÎÄ¼ş¿ÉÄÜ´æÔÚ ¿ÉÄÜ²»´æÔÚ
+    // æ–‡ä»¶å¯èƒ½å­˜åœ¨ å¯èƒ½ä¸å­˜åœ¨
     if (resource == NULL)
         not_found(client);
     else
@@ -530,6 +538,7 @@ int main(void)
 
     server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
+    // daemon(1, 1);
 
     while (1)
     {
